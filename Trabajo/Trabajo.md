@@ -58,7 +58,8 @@ Interpretación de los resultados
 ==========================
 La salida de siege es de la siguiente forma:  
 
-
+![salidaSiege1](https://github.com/JacintoCC/swap1415/blob/master/Trabajo/img/salidaSiege1.png)  
+![salidaSiege2](https://github.com/JacintoCC/swap1415/blob/master/Trabajo/img/salidaSiege2.png)  
 
 Donde vemos que nos da la disponibilidad que ha tenido la granja, el tiempo que ha estado ejecutándose, la cantidad de datos que se han transferido, el tiempo medio de respuesta y el número de peticiones por segundo que se han hecho (transaction rate). Además nos muestra el número de peticiones que han tenido éxito y las que no. Podemos ver también los segundos que ha tardado la petición más larga y los que ha tardado la petición más corta.  
 
@@ -70,7 +71,7 @@ Pasamos por lo tanto a ver la implementación de los algoritmos en Nginx:
 
 **Round Robin**: Es el algoritmo por defecto si no se especifica nada más, por lo que sólo tendremos que especificar las IPs de nuestras 4 máquinas en la sección upstream. En concreto, el fichero de configuración localizado en `/etc/nginx/conf.d/default.conf` es:  
 
-
+![(roundrobin)nginx](https://github.com/JacintoCC/swap1415/blob/master/Trabajo/img/(roundrobin)nginx.png)  
 
 Los resultados obtenidos han sido los siguientes (en media):  
 Availability: 67,92 %  
@@ -81,7 +82,7 @@ Transaction Rate: 3,209
 **Basado en el menor número de conexiones**: Este algoritmo está implementado sólo poniendo la directiva `least_conn`, pero no es exactamente el que hemos explicado al principio del trabajo, sino que es una versión mejorada del mismo, de forma que envía la siguiente petición al servidor con menor número de conexiones activas. Así, si un servidor está sobrecargado, tendrá más conexiones activas y no se le enviará, a diferencia del explicado anteriormente.  
 La configuración es la siguiente:  
 
-
+![(least_conn)nginx](https://github.com/JacintoCC/swap1415/blob/master/Trabajo/img/(least_conn)nginx.png)  
 
 Y  los resultados han sido los siguientes (en media):  
 Availability: 97,54 %  
@@ -92,7 +93,7 @@ Transaction Rate: 5,848
 **Ponderación**: Es el round robin con pesos y se puede implementar igual utilizando la directiva `weight`.
 La configuración es la siguiente (hemos dado los pesos en función de las capacidades de las máquinas):  
 
-
+![(ponderacion)nginx](https://github.com/JacintoCC/swap1415/blob/master/Trabajo/img/(ponderacion)nginx.png)  
 
 Y los resultados (en media) han sido:  
 Availability: 75,39 %  
@@ -103,7 +104,7 @@ Transaction Rate: 3,963
 **Prioridad**: Este algoritmo no hemos podido implementarlo tal y como viene explicado al principio del trabajo ya que, aunque se pueden definir diferentes grupos con upstream, no podemos darle una prioridad a cada uno y que ambos balanceen de la misma localización. Hemos encontrado que esto sirve para filtrar por localización, por ejemplo, si la petición llega desde España, se envía al primer grupo de servidores, que sirven la página en español, pero si llega desde Estados Unidos, se envía al segundo grupo de servidores, que la enviarán en inglés. Así pues, hemos implementado dicho algoritmo lo más parecido posible pero sin los grupos, es decir, hemos puesto la segunda máquina como backup, de forma que sólo se le enviarán peticiones cuando los demás fallen, y ponemos que las demás máquinas se marcarán como caídas cuando tengan 3 fallos en 5 segundos (y estarán marcadas como caídas durante 5 segundos). Además, le damos como número máximo de conexiones a la primera y a la segunda máquina 25, a la tercera 50 y a la última 10, lo que sólo es posible en Nginx Plus, que es el que tiene la directiva max_conns.  
 La configuración es la siguiente:  
 
-
+![(prioridad)nginx](https://github.com/JacintoCC/swap1415/blob/master/Trabajo/img/(prioridad)nginx.png)  
 
 Y los resultados (en media) han sido:  
 Availability: 97,86 %  
@@ -116,7 +117,7 @@ Transaction Rate: 5,339
 **Combinación del tiempo de respuesta y el menor número de conexiones:** Este algoritmo se puede implementar fácilmente con la directiva least_time, en la que podemos elegir entre escoger el tiempo que tarda en enviar la cabecera http (header) o lo que tarda en enviar todo el contenido (last_byte), pero es necesario tener Nginx Plus.  
 La configuración es la siguiente:  
 
-
+![(combinacion)nginx](https://github.com/JacintoCC/swap1415/blob/master/Trabajo/img/(combinacion)nginx.png)  
 
 Y los resultados (en media) han sido:  
 Availability: 97,98 %  
@@ -132,7 +133,7 @@ Por supuesto, esto es sólo una parte de lo que Nginx permite hacer. Vamos a ver
 Para marcar un servidor como caído utilizamos lo mismo que anteriormente, las directivas `max_fails` y `fail_timeout` de forma que se marcará como caído si no sirve 3 peticiones en 5 segundos.  
 La configuración es la siguiente:  
 
-
+![(slow_start)nginx](https://github.com/JacintoCC/swap1415/blob/master/Trabajo/img/(slow_start)nginx.png)  
 
 Los resultados (en media) han sido los siguientes:  
 Availability: 82,06 %  
@@ -145,7 +146,7 @@ Como vemos, se mejoran todos los datos con respecto al algoritmo de ponderación
 **Basado en la IP**: La directiva `ip_hash` permite balancear en base la IP de cada usuario, de forma que las peticiones de un mismo usuario irán siempre al mismo servidor (a no ser que éste se caiga, en cuyo caso se mandaría a otro servidor), manteniendo así la persistencia de sesión.  
 La configuración es la siguiente:  
 
-
+![(ip_hash)nginx](https://github.com/JacintoCC/swap1415/blob/master/Trabajo/img/(ip_hash)nginx.png)  
 
 Y los resultados (en media) han sido los siguientes:  
 Availability: 79,21 %  
@@ -156,7 +157,7 @@ Transaction Rate: 4,100
 **Balanceo con caché**: La directiva `keepalive` permite guardar en la caché de los servidores un número máximo de conexiones inactivas de forma que no se vuelva a abrir la conexión si una de estas IPs guardadas hace una nueva petición. Si este número es excedido, la conexión que lleva más tiempo inactiva se elimina y se introduce en su lugar una nueva.  
 La configuración es la siguiente:  
 
-
+![(keepalive)nginx](https://github.com/JacintoCC/swap1415/blob/master/Trabajo/img/(keepalive)nginx.png)  
 
 Y los resultados (en media) son los siguientes:  
 Availability: 85,18 %  
@@ -169,7 +170,7 @@ Donde vemos que la disponibilidad es mejor con respecto al algoritmo anterior.
 **Balanceo con cola de peticiones**: Si un servidor alcanza el número máximo de conexiones, en lugar de mandar un mensaje de error directamente, la directiva `queue` permite meter en la cola (hay una cola común para todos los servidores) las peticiones que excedan ese máximo. Dicha directiva permite especificar el número máximo de peticiones que mantendremos en la cola (en este caso hemos puesto 30) y el tiempo que mantendremos dichas conexiones (por defecto es 60, pero lo hemos puesto para ilustrarlo).
 La configuración es la siguiente:  
 
-
+![(queue)nginx](https://github.com/JacintoCC/swap1415/blob/master/Trabajo/img/(queue)nginx.png)  
 
 Los resultados han sido los siguientes:  
 Availability: 97,74%  
@@ -184,7 +185,7 @@ Implementación y resultados de los algoritmos en HaProxy
 =============================
 **Round Robin**: Es el algoritmo por defecto si no se especifica nada más, aunque se puede poner `balance roundrobin`, por lo que sólo tendremos que especificar las IPs de nuestras 4 máquinas en la sección backend servers. En concreto, el fichero de configuración localizado en `/etc/haproxy/haproxy.cfg` es:  
 
-
+![(roundrobin)haproyx](https://github.com/JacintoCC/swap1415/blob/master/Trabajo/img/(roundrobin)haproyx.png)  
 
 Y los resultados (en media) han sido:  
 Availability: 65,87 %  
@@ -195,6 +196,7 @@ Transaction Rate: 3,143
 Basado en el menor número de conexiones: Este algoritmo está implementado sólo poniendo la directiva `leastconn`, pero ocurre como en Nginx, y es una versión mejorada del mismo, de forma que tampoco sobrecarga las máquinas si no tienen las mismas capacidades.  
 La configuración es la siguiente:  
 
+![(leastconn)haproxy](https://github.com/JacintoCC/swap1415/blob/master/Trabajo/img/(leastconn)haproxy.png)  
 
 
 Y los resultados (en media) han sido:   
@@ -206,7 +208,7 @@ Transaction Rate: 5,693
 **Ponderación**: Es el round robin con pesos y se puede implementar igual utilizando la directiva `weight`.
 La configuración es la siguiente (hemos dado los pesos en función de las capacidades de las máquinas):
 
-
+![(ponderacion)haproxy](https://github.com/JacintoCC/swap1415/blob/master/Trabajo/img/(ponderacion)haproxy.png)  
 
 Y los resultados (en media) han sido:  
 Availability: 76,25 %  
@@ -217,7 +219,7 @@ Transaction Rate: 4,152
 **Prioridad**: Este algoritmo tampoco hemos podido aplicarlo tal y como está explicado en la primera sección. Sin embargo, hemos podido hacer dos formas distintas que se parecen al de prioridad, que son las siguientes:  
 Prioridad A: utilizando el algoritmo `first`que incorpora HaProxy, que manda la petición al primer servidor que tenga conexiones disponibles. Los servidores se eligen en base al menor id, que si no se especifica, por defecto es el orden en el que están dadas las máquinas. Cada máquina tiene un número máximo de conexiones y una vez las alcanza, pasa a la siguiente máquina. La diferencia de este y el de prioridad inicial es que no se pueden hacer grupos de servidores. La configuración es la siguiente:  
 
-
+![(prioridad)haproxy](https://github.com/JacintoCC/swap1415/blob/master/Trabajo/img/(prioridad)haproxy.png)  
 
 Y los resultados (en media) han sido los siguientes:  
 Availability: 91,03 %  
@@ -227,7 +229,7 @@ Transaction Rate: 5,445
 
 **Prioridad B**: La segunda opción es definir dos conjuntos de servidores y dejar uno de ellos como backup, de forma que sólo se le enviará carga si el primer conjunto supera un cierto número de conexiones, que en nuestro caso hemos configurado en 60. La configuración es la siguiente:  
 
-
+![(prioridadB)haproxy](https://github.com/JacintoCC/swap1415/blob/master/Trabajo/img/(prioridadB)haproxy.png)  
 
 Y los resultados (en media) han sido los siguientes:  
 Availability: 79,055 %  
@@ -242,7 +244,12 @@ Transaction Rate: 4,273
 
 **Source**: Este algoritmo conduce a cada máquina siempre al mismo servidor a no ser que éste esté caído. El reparto inicial se hace según los pesos asignados y usando como función de asignación un hash de la IP.
 
+![(source)haproxy](https://github.com/JacintoCC/swap1415/blob/master/Trabajo/img/(source)haproxy.png)  
+
 **Prioridad C**: Este algoritmo es similar a los explicados sobre prioridad aunque atiende a otros parámetros para escoger un grupo de servidores u otro. Entendiendo que el grupo por defecto es más potente por las características de sus servidores, usaremos el otro grupo de servidores en caso de que el ratio de llegada sea de más de 4 peticiones por segundo o bien al grupo por defecto le queden menos de 10 slots disponibles para recibir peticiones.  
+
+
+![(prioridadC)haproxy](https://github.com/JacintoCC/swap1415/blob/master/Trabajo/img/(prioridadC)haproxy.png)  
 
 
 Y los datos (en media) han sido:  
@@ -256,30 +263,24 @@ Vamos ahora a representar los datos obtenidos tanto en Nginx como en HaProxy.
 
 Representación de los datos de Nginx:  
 
-Donde la disponibilidad está con respecto al eje de la izquierda y los tiempos en el eje de la derecha. Vemos como los mejores algoritmos en este caso teniendo en cuenta la disponibilidad son el de menor número de conexiones, prioridad y la combinación de tiempo de respuesta y menor número de conexiones.  
+![datosNginx](https://github.com/JacintoCC/swap1415/blob/master/Trabajo/img/datosNginx.png)  
 
+Donde la disponibilidad está con respecto al eje de la izquierda y los tiempos en el eje de la derecha. Vemos como los mejores algoritmos en este caso teniendo en cuenta la disponibilidad son el de menor número de conexiones, prioridad y la combinación de tiempo de respuesta y menor número de conexiones.  
 En cuanto al algoritmo de ponderación y el algoritmo de ponderación con `slow_start`, como hemos dicho anteriormente, tenemos que al ponerle la directiva los tiempos y la disponibilidad mejoran un poco:  
 
-
+![datosNginx2](https://github.com/JacintoCC/swap1415/blob/master/Trabajo/img/datosNginx2.png) 
 
 Comparamos ahora los nuevos algoritmos probados:  
 
+![datosNginx3](https://github.com/JacintoCC/swap1415/blob/master/Trabajo/img/datosNginx3.png)  
 
 y vemos que sin duda el mejor de ellos es el que implementa la cola en la que se guardan las peticiones de no poder servirlas.  
 
 Representación de los datos de HaProxy:  
 
+![datosHaproxy](https://github.com/JacintoCC/swap1415/blob/master/Trabajo/img/datosHaproxy.png) 
 
 Donde la disponibilidad está con respecto al eje izquierdo y los tiempos con respecto al eje derecho. Vemos que en este caso los mejores algoritmos son el de menor número de conexiones seguido del de prioridad A.  
-
-NGINX:  
-persistencia: upstream myapp1 {  
-    ip_hash;  
-    server srv1.example.com;  
-    server srv2.example.com;  
-    server srv3.example.com;  
-}  
-
 
 ###Referencia para Nginx:  
 http://nginx.org/en/docs/http/load_balancing.html  
