@@ -20,13 +20,15 @@ Otra forma de comprobar el número de conexiones es con `netstat | grep -c http`
 
 T5.2  
 ----  
-**Revisar los análisis de tráfico que se ofrecen en: http://bit.ly/1g0dkKj. Instalar
- wireshark y observar cómo fluye el tráfico de red en uno de los servidores web
- mientras se le hacen peticiones HTTP.**  
+**Revisar los análisis de tráfico que se ofrecen en: http://bit.ly/1g0dkKj. Instalar Wireshark y observar cómo fluye el tráfico de red en uno de los servidores web mientras se le hacen peticiones HTTP.**  
+Hemos hecho una prueba para pedir con siege una página html al balanceador y capturar el tráfico (10 paquetes) que pasa a través del balanceador con Tshark.
+![Tshark](https://github.com/JacintoCC/swap1415/blob/master/Ejercicios_Clase/T5.2.png)
 
+T5.3  
+----  
+**Buscar información sobre características, disponibilidad para diversos SO, etc de herramientas para monitorizar las prestaciones de un servidor. Para empezar, podemos comenzar utilizando las clásicas de Linux: top, vmstat, netstat**  
 
-T5.3
-----
-**Buscar información sobre características, disponibilidad para diversos SO, etc de 
- herramientas para monitorizar las prestaciones de un servidor. Para empezar, 
- podemos comenzar utilizando las clásicas de Linux: top,vmstat,netstat **  
+Con top podemos tener una vista dinámica de un sistema en funcionamiento. Puede mostrar un resumen y una lista de procesos manejados por el kernel Linux. Tiene una limitada interfaz interactiva y una interfaz más amplia para la configuración personal.  
+vmstat muestra información sobre procesos, memoria, discos, E/S y actividad de la CPU.
+netstat muestra conexiones de red, tablas de enrutamiento, las máscaras de las diferentes conexiones y estadísticas de las diferentes interfaces.
+
